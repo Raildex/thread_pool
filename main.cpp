@@ -4,47 +4,47 @@
 using namespace rdx;
 
 unsigned int fibonacci(unsigned int num) {
-	if (num == 0) { // Die Fibonacci-Zahl von null ist null
+	if (num == 0) {
 		return 0;
-	} // else
-	if (num == 1) { // Die Fibonacci-Zahl von eins ist eins
+	}
+	if (num == 1) {
 		return 1;
-	} // else
-
-	// Ansonsten wird die Summe der zwei vorherigen Fibonacci-Zahlen zurückgegeben.
+	}
 	return fibonacci(num - 1) + fibonacci(num - 2);
 }
 
 int main() {
-	srand(time(NULL));
-	thread_pool pool(4);
-	std::mutex m;
-	pool.enqueue([&m]() {
-		std::this_thread::sleep_for(std::chrono::seconds(rand() % 10));
+	std::chrono::nanoseconds concurrent = std::chrono::nanoseconds(0);
+	std::chrono::nanoseconds serial = std::chrono::nanoseconds(0);
+	for (int i = 0; i < 300; i++) {
+		auto start = std::chrono::high_resolution_clock::now();
+		{
+			thread_pool pool{};
+			start = std::chrono::high_resolution_clock::now();
+			pool.enqueue([]() {
+				auto val = fibonacci(32);
+			});
+			pool.enqueue([]() {
+				auto val = fibonacci(32);
+			});
+			pool.enqueue([]() {
+				auto val = fibonacci(32);
+			});
+			pool.enqueue([]() {
+				auto val = fibonacci(32);
+			});
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		concurrent += end - start;
+		start = std::chrono::high_resolution_clock::now();
 		auto val = fibonacci(32);
-		std::unique_lock<std::mutex> lock(m);
+		val = fibonacci(32);
+		val = fibonacci(32);
+		val = fibonacci(32);
+		end = std::chrono::high_resolution_clock::now();
+		serial += end - start;
+	}
 
-		std::cout << "d : " << val << std::endl;
-	});
-	pool.enqueue([&m]() {
-		std::this_thread::sleep_for(std::chrono::seconds(rand() % 10));
-		auto val = fibonacci(32);
-		std::unique_lock<std::mutex> lock(m);
-
-		std::cout << "d : " << val << std::endl;
-	});
-	pool.enqueue([&m]() {
-		std::this_thread::sleep_for(std::chrono::seconds(rand() % 10));
-		auto val = fibonacci(32);
-		std::unique_lock<std::mutex> lock(m);
-
-		std::cout << "d : " << val << std::endl;
-	});
-	pool.enqueue([&m]() {
-		std::this_thread::sleep_for(std::chrono::seconds(rand() % 10));
-		auto val = fibonacci(48);
-		std::unique_lock<std::mutex> lock(m);
-		std::cout << "d : " << val << std::endl;
-	});
-	pool.join();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(concurrent).count() / 100 << std::endl;
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(serial).count() / 100 << std::endl;
 }
