@@ -26,7 +26,7 @@ namespace rdx {
 		void worker_function();
 	public:
 		// constructs a thread pool with the given number of workers
-		thread_pool(std::size_t num_workers = std::thread::hardware_concurrency());
+		explicit thread_pool(std::size_t num_workers = std::thread::hardware_concurrency());
 		~thread_pool();
 		//enqueues a task to be performed and returns a future for that task
 		template<class F, class... Args>
@@ -44,7 +44,7 @@ namespace rdx {
 		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		std::future<return_type> res = task->get_future();
 		{
-			std::unique_lock<std::mutex> lock(queue_mutex);
+			std::lock_guard<std::mutex> lock(queue_mutex);
 			task_queue.emplace([task]() { (*task)(); });
 		}
 		queue_notification.notify_one();
