@@ -1,0 +1,5 @@
+target("thread_pool")
+set_kind("static")
+add_files("src/thread_pool/*.cpp")
+add_includedirs("include", {public = true})
+target_end()

@@ -1,4 +1,4 @@
-#include "thread_pool.hpp"
+#include "thread_pool/thread_pool.hpp"
 #include <thread>
 #include <iostream>
 using namespace rdx;
@@ -37,7 +37,7 @@ void parallel() {
 		auto end = std::chrono::high_resolution_clock::now();
 		concurrent += end - start;
 	}
-	std::wcout << L"Parallel : Ø\t" << concurrent.count() / 300 << L"ns" << std::endl;
+	std::wcout << L"Parallel :\t" << concurrent.count() / 300 << L"ns" << std::endl;
 }
 
 
@@ -55,7 +55,7 @@ void serial() {
 		serial += end - start;
 
 	}
-	std::wcout << L"Serial : Ø\t" << serial.count() / 300 << L"ns" << std::endl;
+	std::wcout << L"Serial :\t" << serial.count() / 300 << L"ns" << std::endl;
 
 }
 
